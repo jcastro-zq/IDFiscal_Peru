@@ -19,10 +19,12 @@ def consulta_ruc():
         url = f"https://e-consultaruc.sunat.gob.pe/cl-ti-itmrconsruc/jcrS00Alias?accion=consPorRuc&nroRuc={ruc}&codigo=12345678"
         response = session.get(url, headers=headers)
 
+    
     print("===== HTML devuelto por SUNAT =====")
         print(response.text)
         print("===== FIN DEL HTML =====")
-        
+
+
         soup = BeautifulSoup(response.text, "html.parser")
 
         tabla = soup.find("table", class_="form-table")

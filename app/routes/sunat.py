@@ -20,9 +20,9 @@ def consulta_ruc():
         response = session.get(url, headers=headers)
 
     
-    print("===== HTML devuelto por SUNAT =====")
+        print("======= HTML devuelto por SUNAT =======")
         print(response.text)
-        print("===== FIN DEL HTML =====")
+        print("========= FIN HTML SUNAT ===========")
 
 
         soup = BeautifulSoup(response.text, "html.parser")

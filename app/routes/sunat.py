@@ -5,29 +5,32 @@ from bs4 import BeautifulSoup
 SunatRoutes = Blueprint('SunatRoutes', __name__)
 
 @SunatRoutes.route('/', methods=['GET'])
-def consulta_sunat():
+def consulta_ruc():
     ruc = request.args.get("ruc")
     if not ruc:
         return jsonify({"error": "Falta el RUC"}), 400
 
     try:
-        url = f"https://e-consultaruc.sunat.gob.pe/cl-ti-itmrconsruc/jcrS00Alias?accion=consPorRuc&nroRuc={ruc}&codigo=123"
-        headers = {
-            "User-Agent": "Mozilla/5.0"
-        }
-        response = requests.get(url, headers=headers, timeout=10)
+        session = requests.Session()
+        headers = {"User-Agent": "Mozilla/5.0"}
+
+        session.get("https://e-consultaruc.sunat.gob.pe/cl-ti-itmrconsruc/frameCriterioBusqueda.jsp", headers=headers)
+
+        url = f"https://e-consultaruc.sunat.gob.pe/cl-ti-itmrconsruc/jcrS00Alias?accion=consPorRuc&nroRuc={ruc}&codigo=12345678"
+        response = session.get(url, headers=headers)
         soup = BeautifulSoup(response.text, "html.parser")
 
-        td = soup.find("td", string="Nombre o Razón Social")
-        if not td:
-            return jsonify({"ruc": ruc, "estado": "No encontrado"}), 404
+        tabla = soup.find("table", class_="form-table")
+        if not tabla:
+            return jsonify({"estado": "No encontrado", "ruc": ruc})
 
-        razon_social = td.find_next("td").text.strip()
+        razon_social = tabla.find_all("tr")[0].find_all("td")[1].text.strip()
+
         return jsonify({
             "ruc": ruc,
             "razon_social": razon_social,
             "estado": "Encontrado"
         })
-    
+
     except Exception as e:
         return jsonify({"error": str(e)}), 500
